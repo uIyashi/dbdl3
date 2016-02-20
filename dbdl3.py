@@ -6,6 +6,12 @@ def blacklist(blacklist, general):
             return False
     return True
 
+def localtag(tag, general):
+    for t in tag.split():
+        if t not in general:
+            return False
+    return True
+
 def achievements(typeof, arg):
     """Achievements thing
 typeof is an int, corresponding with the list below.
@@ -38,7 +44,7 @@ arg is what will be tested. Check list below.
             
             
 
-def dandl(tag):
+def dandl(tag, local):
     """Downloading pictures from danbooru with the supplied tags
     Will return False is tag sting is empty"""  
     if len(tag) == 0:
@@ -60,22 +66,26 @@ def dandl(tag):
     skipped = 0
     sourcefile = {}
     pjson = requests.get("http://donmai.us/posts.json?tags=" + tag + "&page=" + str(page)).json()
+    print("Downloaded / Skipped")
     while len(pjson) > 0:
         for item in pjson:
-            if blacklist(blt, item["tag_string"]):
-                print(score, end="\r")
-                print("http://donmai.us" + item["file_url"])
+            if blacklist(blt, item["tag_string"]) and localtag(local, item["tag_string"]) and ("file_url" in item):
                 pic = requests.get("http://donmai.us" + item["file_url"]).content
                 filename = item["rating"] + "_" + str(item["id"]) + "." + item["file_ext"]
-                print("{} : {}".format(score, filename), end="\r")
+                print("{}/{}: {}".format(score, skipped, filename), end="\r")
+                
                 with open(filename, "wb") as fpic:
                     fpic.write(pic)
                 score += 1
-                sourcefile[item["id"]] = item
-                with open(tag + ".dbdl", "wb") as sf:
-                    pickle.dump(sourcefile, sf)
+                try:
+                    sourcefile[item["id"]] = item
+                    with open(tag + ".dbdl", "wb") as sf:
+                        pickle.dump(sourcefile, sf)
+                except:
+                    pass
             else:
                 skipped += 1
+
         page += 1
         pjson = requests.get("http://donmai.us/posts.json?tags=" + tag + "&page=" + str(page)).json()
         
@@ -104,7 +114,8 @@ while 1:
 #        empty = {"downloaded": 0,
 #                 "It's ok.": False,
 #                 "RAISE YOUR HONKERS": False}
-        with open("achievements.dbdl", "wb") as nf:
-            pickle.dump(empty, nf)
+#        with open("achievements.dbdl", "wb") as nf:
+#           pickle.dump(empty, nf)
     else:
-        dandl(thing)
+        local = input("Local tags:")
+        dandl(thing, local)
