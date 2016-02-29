@@ -12,46 +12,81 @@ def localtag(tag, general):
             return False
     return True
 
-def achievements(typeof, arg):
-    """Achievements thing
-typeof is an int, corresponding with the list below.
-arg is what will be tested. Check list below.
-    -1: Return the current dict achievement
-      * arg is whatever
-    0: Tag
-      * arg is a string
-    1: Download milestone
-      * arg is an int
+##def achievements(typeof, arg):
+##    """Achievements thing
+##typeof is an int, corresponding with the list below.
+##arg is what will be tested. Check list below.
+##    -1: Return the current dict achievement
+##      * arg is whatever
+##    0: Tag
+##      * arg is a string
+##    1: Download milestone
+##      * arg is an int
+##
+##    Return the name of the achievement if you get an achievement, nothing if you don't"""
+##
+##    if typeof == -1:
+##        with open("achievement.dbdl", "rb") as af:
+##            return pickle.load(af)
+##    
+##    with open("achievements.dbdl", "rb") as af:
+##        ach = pickle.load(af)
+##
+##    with open("achievements.dbdl", "wb") as af:
+##        if typeof == 0:
+##            if arg == "kousaka_honoka" and ach["RAISE YOUR HONKERS"] == False:
+##                ach["RAISE YOUR HONKERS"] == True
+##                pickle.dump(ach, af)
+##                return "RAISE YOUR HONKERS"
+##        if typeof == 1:
+##            ach["downloaded"] += arg
+##            pickle.dump(arg, af)
+##            
 
-    Return the name of the achievement if you get an achievement, nothing if you don't"""
+def printsauces(datas):
+    # Essentials
+    print("Artist: " + datas["tag_string_artist"])
+    print("ID    : " + str(datas["id"]))
+    print("Pixiv : " + str(datas["pixiv_id"]))
+    if "pixiv" in datas["source"]:
+        source = "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + source.split("/")[-1].split("_")[0].split(".")[0]
+        print("Source: " + source)
+    else:
+        print("Source: " + datas["source"])
+    print("Tags  : " + datas["tag_string"])
+    print("Chars : " + datas["tag_string_character"])
 
-    if typeof == -1:
-        with open("achievement.dbdl", "rb") as af:
-            return pickle.load(af)
+def sauces(folder):
+    os.chdir(folder)
+    with open(folder+".dbdl", "rb") as sourcefile:
+        sdic = pickle.load(sourcefile)
+
+    print("Input the ID of the picture")
+    print("eg: s_420123.png > 420123")
+    print("Input something else to get bak\n")
+
+    while 1:
+        pid = input(">>> ")
+        try:
+            pid = int(pid)
+            printsauces(sdic[pid])
+        except ValueError:
+            return 0
+        except KeyError:
+            print("Not found :(")
+            pid = 0
+
     
-    with open("achievements.dbdl", "rb") as af:
-        ach = pickle.load(af)
 
-    with open("achievements.dbdl", "wb") as af:
-        if typeof == 0:
-            if arg == "kousaka_honoka" and ach["RAISE YOUR HONKERS"] == False:
-                ach["RAISE YOUR HONKERS"] == True
-                pickle.dump(ach, af)
-                return "RAISE YOUR HONKERS"
-        if typeof == 1:
-            ach["downloaded"] += arg
-            pickle.dump(arg, af)
-            
-            
 
 def dandl(tag, local):
     """Downloading pictures from danbooru with the supplied tags
     Will return False is tag sting is empty"""  
     if len(tag) == 0:
         return False
-
-    with open("blacklist.txt", "r") as blf:
-        blt = blf.read()
+    if os.path.exists("blacklist.txt"):
+        with open("blacklist.txt", "r") as blf:
+            blt = blf.read()
 
 #    acht = achievements(0, tag)
 #    if acht != "":
@@ -104,6 +139,7 @@ print("* Input some tags to begin *")
 print("Alternatively, input a letter", "to do something else.", sep="\n")
 #print("[a] Achievement init")
 print("[b] Local blacklisting")
+print("[s] Info and sources")
 while 1:
     thing = input(">>>")
     if thing == "b":
@@ -116,6 +152,11 @@ while 1:
 #                 "RAISE YOUR HONKERS": False}
 #        with open("achievements.dbdl", "wb") as nf:
 #           pickle.dump(empty, nf)
+    elif thing == "s":
+        print("Enter a folder name")
+        sltskyneo = input(">>> ")
+        sauces(sltskyneo)
+        
     else:
         local = input("Local tags:")
         dandl(thing, local)
